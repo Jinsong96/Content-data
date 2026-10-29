@@ -1,0 +1,551 @@
+<meta charset="utf-8">
+<title>一鹿知内容看板</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: left rail, three pages that each answer one question — 北极星 (is content helping WMR), 供给 (what to restock), 内容表现 (what users love). Tokens shared with 一鹿知运营后台. */
+:root {
+  --bg: #f4f5f8; --panel: #ffffff; --panel-2: #f8f9fb;
+  --ink: #141823; --ink-2: #4a5263; --ink-3: #7b8394; --line: #e2e5ec; --grid: #eceef3;
+  --accent: #26326e; --accent-ink: #ffffff; --accent-soft: #e7eaf6;
+  --s1: #2a78d6; --muted-bar: #c9ced9;
+  --good: #0ca30c; --warn: #fab219; --critical: #d03b3b;
+  --good-ink: #0a7a0a; --warn-ink: #8a5d00; --crit-ink: #b52f2f;
+  --c-world: #2a78d6; --c-sci: #1baf7a; --c-cul: #eb6834; --c-biz: #8a63d2; --c-grow: #c99512; --c-story: #d6457a;
+  --f-body: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111318; --panel: #1a1c22; --panel-2: #20232a;
+    --ink: #eef0f4; --ink-2: #b8beca; --ink-3: #8a91a0; --line: #2d313a; --grid: #262931;
+    --accent: #a9b6ff; --accent-ink: #141823; --accent-soft: #252b45;
+    --s1: #3987e5; --muted-bar: #474c58;
+    --good-ink: #4cc94c; --warn-ink: #f5c04a; --crit-ink: #f07a7a;
+    --c-world: #3d8be6; --c-sci: #22b884; --c-cul: #f07a47; --c-biz: #9d7ae0; --c-grow: #d9a62a; --c-story: #e0608c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111318; --panel: #1a1c22; --panel-2: #20232a;
+  --ink: #eef0f4; --ink-2: #b8beca; --ink-3: #8a91a0; --line: #2d313a; --grid: #262931;
+  --accent: #a9b6ff; --accent-ink: #141823; --accent-soft: #252b45;
+  --s1: #3987e5; --muted-bar: #474c58;
+  --good-ink: #4cc94c; --warn-ink: #f5c04a; --crit-ink: #f07a7a;
+  --c-world: #3d8be6; --c-sci: #22b884; --c-cul: #f07a47; --c-biz: #9d7ae0; --c-grow: #d9a62a; --c-story: #e0608c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.55; }
+button, select, input { font: inherit; color: inherit; }
+td, .k-val, .num { font-variant-numeric: tabular-nums; }
+
+.app { display: grid; grid-template-columns: 200px minmax(0, 1fr); min-height: 100vh; }
+.rail { background: var(--panel); border-right: 1px solid var(--line); padding-block: 20px; padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: 14px; position: sticky; top: 0; height: 100vh; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 20px; }
+.brand-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; }
+.brand b { display: block; font-size: 15px; }
+.brand span { font-size: 12px; color: var(--ink-3); }
+.nav { display: grid; gap: 2px; }
+.nav a { display: flex; flex-direction: column; padding: 8px 10px; border-radius: 7px; color: var(--ink-2); text-decoration: none; }
+.nav a small { font-size: 11.5px; color: var(--ink-3); }
+.nav a:hover { background: var(--panel-2); color: var(--ink); }
+.nav a[aria-current="page"] { background: var(--accent-soft); color: var(--ink); font-weight: 500; }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.main { min-width: 0; padding-block: 20px 48px; padding-left: 28px; padding-right: max(28px, env(safe-area-inset-right, 0px)); max-width: 1320px; }
+.topbar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; margin-bottom: 18px; }
+.topbar h1 { font-size: 21px; margin: 0; }
+.sample { font-size: 12.5px; background: var(--accent-soft); color: var(--ink-2); border-radius: 6px; padding: 2px 8px; }
+
+.grid { display: grid; gap: 16px; }
+.g-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.g-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g-52 { grid-template-columns: minmax(0, 5fr) minmax(0, 4fr); }
+.span-2 { grid-column: span 2; }
+.row { margin-top: 16px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.panel h3 { margin: 0 0 14px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+.panel h3 small { font-weight: 400; font-size: 12px; color: var(--ink-3); }
+
+.info { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; border: 1px solid currentColor; font-size: 10px; font-style: normal; font-weight: 600; color: var(--ink-3); cursor: help; margin-left: 4px; vertical-align: 1px; line-height: 1; }
+
+a.kpi { color: inherit; text-decoration: none; }
+a.kpi:hover { border-color: var(--ink-3); }
+.kpi { display: flex; flex-direction: column; gap: 4px; }
+.kpi .k-label { color: var(--ink-2); font-size: 13px; }
+.kpi .k-val { font-size: 30px; font-weight: 700; line-height: 1.15; letter-spacing: -.01em; }
+.kpi .k-val small { font-size: 14px; font-weight: 400; color: var(--ink-3); margin-left: 3px; }
+.kpi .k-foot { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--ink-3); }
+.kpi.hero { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.kpi.hero .k-label, .kpi.hero .k-val small, .kpi.hero .k-foot, .kpi.hero .info { color: color-mix(in srgb, var(--accent-ink) 78%, transparent); }
+.kpi.alert .k-val { color: var(--crit-ink); }
+.delta { font-size: 12px; padding: 0 6px; border-radius: 5px; font-weight: 500; }
+.delta.up { color: var(--good-ink); background: color-mix(in srgb, var(--good) 13%, transparent); }
+.delta.down { color: var(--crit-ink); background: color-mix(in srgb, var(--critical) 13%, transparent); }
+.kpi.hero .delta { color: var(--accent-ink); background: color-mix(in srgb, var(--accent-ink) 18%, transparent); }
+.spark { width: 100%; height: 30px; display: block; margin-top: 6px; }
+
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 0 8px; border-radius: 999px; white-space: nowrap; border: 1px solid var(--line); color: var(--ink-2); }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); }
+.pill.good { color: var(--good-ink); border-color: color-mix(in srgb, var(--good) 40%, transparent); }
+.pill.good::before { background: var(--good); }
+.pill.warn { color: var(--warn-ink); border-color: color-mix(in srgb, var(--warn) 60%, transparent); }
+.pill.warn::before { background: var(--warn); }
+.pill.crit { color: var(--crit-ink); border-color: color-mix(in srgb, var(--critical) 50%, transparent); }
+.pill.crit::before { background: var(--critical); }
+
+.bars { display: grid; gap: 9px; }
+.bar-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 58px; gap: 10px; align-items: center; font-size: 13px; }
+.bar-row .lbl { color: var(--ink-2); white-space: nowrap; }
+.bar-row .val { text-align: right; font-variant-numeric: tabular-nums; }
+.track { height: 14px; position: relative; background: var(--panel-2); border-radius: 0 4px 4px 0; }
+.fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; min-width: 2px; background: var(--s1); }
+
+.svgchart { width: 100%; display: block; overflow: visible; }
+.svgchart text { fill: var(--ink-3); font-size: 11px; font-family: var(--f-body); }
+
+/* inventory matrix */
+.matrix { display: grid; grid-template-columns: 56px repeat(4, minmax(0, 1fr)) 48px; gap: 4px; font-size: 13px; }
+.matrix .hh { color: var(--ink-3); font-size: 12px; text-align: center; }
+.matrix .hh.r { text-align: right; }
+.matrix .rh { color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+.matrix .rh i, .cat i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.matrix .tot { color: var(--ink-2); display: flex; align-items: center; justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.matrix .ft { color: var(--ink-2); text-align: center; font-variant-numeric: tabular-nums; padding-top: 2px; }
+.matrix button { border: 0; border-radius: 6px; padding: 8px 0 7px; cursor: pointer; display: flex; flex-direction: column; align-items: center; line-height: 1.25; color: var(--ink); }
+.matrix button b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.matrix button small { font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.st-crit { background: color-mix(in srgb, var(--critical) 22%, var(--panel)); }
+.st-warn { background: color-mix(in srgb, var(--warn) 26%, var(--panel)); }
+.st-good { background: color-mix(in srgb, var(--good) 11%, var(--panel)); }
+.matrix button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--ink-2); margin-top: 12px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.cellinfo { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--panel-2); font-size: 13px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.cellinfo b { color: var(--ink); font-weight: 600; }
+
+/* supply vs demand */
+.sd { display: grid; gap: 12px; }
+.sd-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 92px; gap: 10px; align-items: center; font-size: 13px; }
+.sd-bars { display: grid; gap: 3px; }
+.sd-bars .track { height: 10px; }
+.sd-bars .fill.inv { background: var(--muted-bar); }
+.sd-diff { text-align: right; display: flex; justify-content: flex-end; }
+
+/* tables */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th { text-align: left; font-weight: 500; color: var(--ink-3); font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--ink); }
+th[aria-sort="descending"]::after { content: " ↓"; }
+th[aria-sort="ascending"]::after { content: " ↑"; }
+td { padding: 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td.r, th.r { text-align: right; }
+tr:last-child td { border-bottom: 0; }
+tbody tr.click { cursor: pointer; }
+tbody tr.click:hover td { background: var(--panel-2); }
+tbody tr.sel td { background: var(--accent-soft); }
+tr.avg td { color: var(--ink-3); background: var(--panel-2); }
+tr.low td { color: var(--ink-3); }
+tfoot td { font-weight: 600; border-top: 1px solid var(--line); border-bottom: 0; }
+td.title { white-space: normal; min-width: 200px; }
+td.title small { display: block; color: var(--ink-3); font-size: 12px; }
+td.need { font-weight: 700; }
+.cat { display: inline-flex; align-items: center; gap: 6px; }
+.pp { display: inline-block; min-width: 40px; margin-left: 6px; font-size: 11.5px; text-align: right; }
+.pp.up { color: var(--good-ink); }
+.pp.down { color: var(--crit-ink); }
+.pp.flat { color: var(--ink-3); }
+.tags { color: var(--ink-2); }
+.foot { margin-top: 10px; font-size: 12px; color: var(--ink-3); }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--panel); font-weight: 400; }
+.seg button { border: 0; background: none; padding: 3px 10px; cursor: pointer; color: var(--ink-2); font-size: 12.5px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.clear { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 0 8px; font-size: 12px; cursor: pointer; color: var(--ink-2); font-weight: 400; }
+
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--panel); border-radius: 7px; padding: 6px 10px; font-size: 12.5px; line-height: 1.55; max-width: 280px; box-shadow: 0 6px 20px rgba(0,0,0,.18); }
+
+@media (max-width: 1100px) {
+  .g-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g-52 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 780px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; height: auto; padding-block: 10px; padding-right: max(14px, env(safe-area-inset-right, 0px)); border-right: 0; border-bottom: 1px solid var(--line); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--panel); }
+  .brand { padding-bottom: 8px; }
+  .nav { display: flex; gap: 4px; }
+  .nav a { white-space: nowrap; padding: 6px 10px; }
+  .nav a small { display: none; }
+  .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .g-3 { grid-template-columns: minmax(0, 1fr); }
+  .g-4 { gap: 10px; }
+  .grid { gap: 12px; }
+  .span-2 { grid-column: auto; }
+  .kpi .k-val { font-size: 24px; }
+  .matrix { grid-template-columns: 44px repeat(4, minmax(0, 1fr)) 34px; gap: 3px; }
+  .matrix button b { font-size: 14px; }
+  .sd-row { grid-template-columns: 40px minmax(0, 1fr) 80px; }
+  .bar-row { grid-template-columns: 40px minmax(0, 1fr) 54px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fill { transition: width .3s ease; }
+}
+</style>
+
+<div class="app">
+  <nav class="rail" aria-label="页面">
+    <div class="brand"><div class="brand-mark">鹿</div><div><b>一鹿知</b><span>内容看板</span></div></div>
+    <div class="nav" id="nav"></div>
+  </nav>
+  <main class="main">
+    <div class="topbar">
+      <h1 id="pageTitle">北极星</h1>
+      <span class="sample">示例数据 · 截至 2026-10-28</span>
+    </div>
+    <section id="p-overview"></section>
+    <section id="p-supply" hidden></section>
+    <section id="p-content" hidden></section>
+  </main>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+(() => {
+/* ---------- reference data (sample) ---------- */
+const PAGES = [
+  { id: "overview", name: "北极星", sub: "内容在帮 WMR 增长吗" },
+  { id: "supply", name: "供给", sub: "哪里缺货 · 补几篇" },
+  { id: "content", name: "内容表现", sub: "用户爱读什么" },
+];
+const CATS = ["世界", "科学", "文化", "商业", "成长", "故事"];
+const CAT_C = { "世界": "var(--c-world)", "科学": "var(--c-sci)", "文化": "var(--c-cul)", "商业": "var(--c-biz)", "成长": "var(--c-grow)", "故事": "var(--c-story)" };
+const LEVELS = ["A1", "A2", "B1", "B2"];
+const USER_LEVEL = { A1: .14, A2: .38, B1: .33, B2: .15 };
+const READERS = 4100; // weekly active readers
+const TARGET_WEEKS = 4;
+
+// per cell: [在架篇数, 本格读者每周平均阅读篇数, 本周新增]
+const CELL_RAW = {
+  "世界": [[3, 2.0, 0], [24, 2.6, 2], [22, 2.8, 2], [16, 2.4, 1]],
+  "科学": [[12, 3.1, 1], [14, 3.4, 1], [9, 3.2, 1], [8, 2.6, 0]],
+  "文化": [[8, 1.8, 0], [14, 2.0, 1], [13, 2.1, 1], [10, 1.9, 0]],
+  "商业": [[2, 1.6, 0], [11, 2.0, 1], [12, 2.2, 1], [11, 2.1, 0]],
+  "成长": [[9, 2.9, 1], [10, 3.0, 1], [9, 2.7, 0], [7, 2.2, 0]],
+  "故事": [[2, 3.2, 0], [8, 3.5, 1], [6, 3.4, 1], [6, 2.8, 0]],
+};
+const WEEKS = ["8/10","8/17","8/24","8/31","9/7","9/14","9/21","9/28","10/5","10/12","10/19","10/26"];
+const WMR = [2100,3400,4800,5600,6900,7600,8800,9500,10400,11200,11420,12340];
+const COMP_D = [-.07,-.065,-.06,-.05,-.045,-.04,-.03,-.03,-.02,-.01,-.015,0]; // offsets to current completion
+const SHORT_HIST = [7,7,6,6,6,5,5,5,4,4,3]; // 缺货格子数, prior weeks
+
+// [id, en, zh, 主题, 标签, 体裁, 发布, 曝光(4周), 点开率, 有意义完读率, 收藏率, 词数(B1), 档位]
+const RAW = [
+  ["boss","The Four-Year-Old Boss","小小老板，大大笑容","世界","社会观察","新闻","10-22",41000,.121,.71,.092,820,"A2 B1 B2"],
+  ["tree","The World's Oldest Tree","世界上最古老的树","科学","自然地理","科普","10-15",38000,.104,.74,.081,760,"A1 A2 B1 B2"],
+  ["mooncake","Mooncakes Are Changing for Young Consumers","月饼正在为年轻消费者而改变","商业","消费观察","新闻","10-08",22000,.086,.63,.043,880,"A2 B1 B2"],
+  ["habits","Five Simple Habits That Can Help You Live Longer","五个帮你更长寿的小习惯","成长","习惯养成","科普","10-19",35000,.142,.46,.038,1150,"A1 A2 B1 B2"],
+  ["alpine","From Runaway Teen to Alpine Champion","从离家少年到阿尔卑斯冠军","文化","体育竞技","叙事","10-12",30000,.061,.78,.095,980,"A2 B1 B2"],
+  ["roadster","Tesla Reopens Roadster Orders","特斯拉重启 Roadster 预订","商业","行业趋势","新闻","10-24",18000,.097,.58,.031,720,"A2 B1 B2"],
+  ["fed","Fed Raises Rates","美联储加息","商业","财经观察","新闻","10-02",14000,.052,.39,.022,1080,"A2 B1 B2"],
+  ["phone","Are You Addicted to Your Smartphone?","你对手机上瘾了吗","成长","习惯养成","科普","09-28",36000,.118,.69,.074,840,"A1 A2 B1 B2"],
+  ["mood","Food and Mood","吃什么会影响你的情绪","科学","人体奥秘","科普","10-05",33000,.113,.72,.083,790,"A1 A2 B1 B2"],
+  ["grain","One Grain's Journey","一粒米从夏收到秋天","科学","农业科技","叙事","10-20",11000,.058,.76,.088,930,"A1 A2 B1 B2"],
+  ["searoute","A New Sea Route from Southwest China","中国西南的新出海通道","世界","全球热点","新闻","10-17",16000,.049,.52,.019,1120,"A2 B1 B2"],
+  ["settop","Goodbye Set-Top Box","告别机顶盒","科学","数码科技","新闻","10-23",17000,.081,.61,.034,680,"A2 B1 B2"],
+  ["xibei","Is Xibei Closing? How to Check Online Rumors","西贝要关门了吗？如何辨别网络传言","世界","社会观察","新闻","10-26",27000,.148,.41,.021,1040,"A2 B1 B2"],
+  ["purr","Why Do Cats Purr?","猫为什么会发出呼噜声","科学","动物世界","科普","09-21",40000,.127,.77,.096,610,"A1 A2 B1 B2"],
+  ["ice","Why Does Ice Float on Water?","冰为什么浮在水面上","科学","科普冷知识","科普","09-21",21000,.079,.66,.041,580,"A1 A2 B1 B2"],
+  ["suitcase","A Stranger Asks You to Keep a Suitcase","陌生人让你保管一只行李箱","故事","悬疑推理","叙事","10-10",30000,.131,.75,.102,960,"A1 A2 B1 B2"],
+  ["desk","Is Your Desk Always Spotless?","你的书桌总是一尘不染吗","成长","人生思考","叙事","10-14",15000,.072,.64,.052,700,"A1 A2 B1 B2"],
+  ["zoo","The Midnight Zoo","午夜动物园","故事","奇幻冒险","叙事","09-30",24000,.109,.70,.088,1010,"A2 B1 B2"],
+  ["robot","The Robot in the Kitchen","厨房里的机器人","故事","科幻故事","叙事","10-06",10000,.055,.79,.091,890,"A2 B1 B2"],
+  ["rooftop","From Unused Rooftop to Community Garden","从闲置屋顶到社区花园","世界","环境环保","叙事","10-01",13000,.066,.62,.044,750,"A1 A2 B1 B2"],
+  ["message","A Message in the Night Sky","夜空里的讯息","故事","科幻故事","叙事","10-18",19000,.088,.67,.061,920,"A2 B1 B2"],
+  ["birds","Why Do Some Birds Migrate?","为什么有些鸟会迁徙","科学","动物世界","科普","09-24",20000,.084,.69,.052,650,"A1 A2 B1 B2"],
+  ["tea","The Story Behind a Cup of Chinese Tea","一杯中国茶背后的故事","文化","传统文化","叙事","10-09",28000,.095,.70,.07,820,"A1 A2 B1 B2"],
+  ["lantern","Lanterns of Mid-Autumn","中秋的花灯","文化","节日民俗","新闻","09-25",26000,.057,.55,.036,710,"A2 B1 B2"],
+  ["popcorn","Why Does Popcorn Pop?","爆米花为什么会爆开","科学","科普冷知识","科普","09-24",18000,.091,.71,.049,560,"A1 A2 B1 B2"],
+  ["halloween","Halloween Around the World","世界各地的万圣节","文化","节日民俗","新闻","10-27",180,.10,.60,.05,690,"A2 B1 B2"],
+];
+const MIN_EXP = 200;
+const LV_D = { A1: .02, A2: .01, B1: -.01, B2: -.04 }; // completion offset by level version
+const lenBucket = w => w < 700 ? "短篇 <700词" : w < 1000 ? "中篇 700–999" : "长篇 ≥1000";
+const ARTS = RAW.map(r => {
+  const a = { id: r[0], en: r[1], zh: r[2], cat: r[3], tag: r[4], genre: r[5], date: r[6], exp: r[7], ctr: r[8], comp: r[9], save: r[10], words: r[11], levels: r[12].split(" ") };
+  a.opens = a.exp * a.ctr; a.reads = a.opens * a.comp; a.saves = a.reads * a.save; a.low = a.exp < MIN_EXP;
+  return a;
+});
+
+/* ---------- derived ---------- */
+const READ_BY_CAT = Object.fromEntries(CATS.map(c => [c, ARTS.filter(a => a.cat === c).reduce((s, a) => s + a.reads, 0)]));
+const READ_ALL = Object.values(READ_BY_CAT).reduce((s, v) => s + v, 0);
+const READ_SHARE = Object.fromEntries(CATS.map(c => [c, READ_BY_CAT[c] / READ_ALL])); // share of meaningful reads
+const CELLS = CATS.flatMap(cat => LEVELS.map((lv, i) => {
+  const [inv, wpr, nw] = CELL_RAW[cat][i];
+  const weeks = inv / wpr, need = Math.max(0, Math.ceil(TARGET_WEEKS * wpr - inv));
+  return { key: cat + "·" + lv, cat, lv, inv, wpr, nw, weeks, need,
+    readers: Math.round(READERS * READ_SHARE[cat] * USER_LEVEL[lv]),
+    st: weeks < 2 ? "crit" : weeks < TARGET_WEEKS ? "warn" : "good" };
+}));
+const INV_TOTAL = CELLS.reduce((s, c) => s + c.inv, 0);
+const SHORT = CELLS.filter(c => c.st === "crit").length;
+
+const DIMS = {
+  "主题": a => a.cat, "标签": a => a.tag, "档位": null, "体裁": a => a.genre, "长度": a => lenBucket(a.words),
+};
+function rates(g) { return { ...g, ctr: g.opens / g.exp, comp: g.reads / g.opens, save: g.saves / g.reads, low: g.exp < MIN_EXP }; }
+function agg(dim) {
+  const G = {};
+  const add = (k, exp, ctr, comp, save, id) => {
+    const g = G[k] || (G[k] = { key: k, exp: 0, opens: 0, reads: 0, saves: 0, ids: new Set() });
+    const o = exp * ctr, r = o * comp;
+    g.exp += exp; g.opens += o; g.reads += r; g.saves += r * save; g.ids.add(id);
+  };
+  ARTS.forEach(a => {
+    if (dim === "档位") {
+      const tot = a.levels.reduce((s, l) => s + USER_LEVEL[l], 0);
+      a.levels.forEach(l => add(l, a.exp * USER_LEVEL[l] / tot, a.ctr, a.comp + LV_D[l], a.save, a.id));
+    } else add(DIMS[dim](a), a.exp, a.ctr, a.comp, a.save, a.id);
+  });
+  return Object.values(G).map(g => rates({ ...g, n: g.ids.size }));
+}
+const AVG = rates(ARTS.reduce((s, a) => ({ exp: s.exp + a.exp, opens: s.opens + a.opens, reads: s.reads + a.reads, saves: s.saves + a.saves }), { exp: 0, opens: 0, reads: 0, saves: 0 }));
+const COMP_SERIES = COMP_D.map(d => AVG.comp + d);
+const TOP_TAGS = Object.fromEntries(CATS.map(cat => [cat, agg("标签").filter(g => !g.low && ARTS.some(a => a.tag === g.key && a.cat === cat)).sort((x, y) => y.comp - x.comp).slice(0, 2).map(g => g.key)]));
+
+/* ---------- state ---------- */
+const S = { page: "overview", cell: null, dim: "主题", sort: "comp", dir: -1, pick: null, best: true };
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const fmt = n => Math.round(n).toLocaleString("en-US");
+const pct = (v, d = 0) => (v * 100).toFixed(d) + "%";
+const catDot = c => `<span class="cat"><i style="background:${CAT_C[c]}"></i>${c}</span>`;
+const info = t => `<i class="info" tabindex="0" data-tip="${t}">i</i>`;
+const deltaHtml = (cur, prev, inverse) => {
+  const d = (cur - prev) / prev, good = inverse ? d < 0 : d > 0;
+  return `<span class="delta ${good ? "up" : "down"}">${d > 0 ? "▲" : "▼"} ${Math.abs(d * 100).toFixed(1)}%</span>`;
+};
+const ppHtml = (v, avg) => {
+  const d = (v - avg) * 100, cls = Math.abs(d) < 1 ? "flat" : d > 0 ? "up" : "down";
+  return `<span class="pp ${cls}">${d > 0 ? "+" : ""}${d.toFixed(1)}</span>`;
+};
+const shortDelta = d => d ? `<span class="delta ${d > 0 ? "down" : "up"}">${d > 0 ? "▲ +" : "▼ "}${d} 格</span>` : `<span class="delta">持平</span>`;
+const stPill = c => `<span class="pill ${c.st}">${c.weeks.toFixed(1)} 周</span>`;
+
+function spark(values, color) {
+  const w = 160, h = 30, mn = Math.min(...values), mx = Math.max(...values), r = mx - mn || 1;
+  const pts = values.map((v, i) => [i / (values.length - 1) * w, h - 3 - (v - mn) / r * (h - 6)]);
+  const d = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join("");
+  const last = pts[pts.length - 1];
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="2.6" fill="${color}"/></svg>`;
+}
+
+function lineChart(values, labels, color) {
+  const W = 640, H = 230, L = 46, R = 14, T = 14, B = 26;
+  const top = Math.ceil(Math.max(...values) * 1.1 / 2000) * 2000, step = top / 4;
+  const x = i => L + i / (values.length - 1) * (W - L - R);
+  const y = v => T + (1 - v / top) * (H - T - B);
+  let g = "";
+  for (let v = 0; v <= top; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v ? (v / 1000) + "k" : 0}</text>`;
+  const pts = values.map((v, i) => [x(i), y(v)]);
+  const line = pts.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join("");
+  const area = line + `L${x(values.length - 1)} ${y(0)}L${x(0)} ${y(0)}Z`;
+  const xl = labels.map((l, i) => i % 2 === 1 ? `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${l}</text>` : "").join("");
+  const cw = (W - L - R) / (values.length - 1);
+  const hits = pts.map((p, i) => `<rect x="${p[0] - cw / 2}" y="${T}" width="${cw}" height="${H - T - B}" fill="transparent" data-tip="${labels[i]} 周 · <b>${fmt(values[i])}</b>"/>`).join("");
+  const last = pts[pts.length - 1];
+  return `<svg class="svgchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="WMR 周趋势">${g}<path d="${area}" fill="${color}" opacity=".1"/><path d="${line}" fill="none" stroke="${color}" stroke-width="2"/><circle cx="${last[0]}" cy="${last[1]}" r="4" fill="${color}" stroke="var(--panel)" stroke-width="2"/><text x="${last[0] - 6}" y="${last[1] - 10}" text-anchor="end" style="fill:var(--ink);font-weight:600">${fmt(values[values.length - 1])}</text>${xl}${hits}</svg>`;
+}
+
+/* ---------- page: 北极星 ---------- */
+function renderOverview() {
+  const n = WMR.length, wmr = WMR[n - 1], comp = COMP_SERIES[n - 1];
+  const shortSeries = [...SHORT_HIST, SHORT];
+  const byCat = CATS.map(c => ({ c, v: wmr * READ_SHARE[c] })).sort((a, b) => b.v - a.v);
+  const mx = byCat[0].v;
+  $("#p-overview").innerHTML = `
+    <div class="grid g-3">
+      <div class="panel kpi hero">
+        <span class="k-label">WMR · 每周有意义阅读${info("本周有意义阅读总次数。<br>有意义 = 读完 12 张卡到报告页；时长 ≥ 词数÷400 分钟；无连续 3 张卡停留 &lt;2 秒；开译文的卡 &lt;50%")}</span>
+        <span class="k-val">${fmt(wmr)}<small>次</small></span>
+        <span class="k-foot">${deltaHtml(wmr, WMR[n - 2])} 较上周</span>
+        ${spark(WMR, "currentColor")}
+      </div>
+      <a class="panel kpi" href="#content">
+        <span class="k-label">有意义完读率${info("有意义阅读次数 ÷ 点开次数。<br>代表内容好不好")}</span>
+        <span class="k-val">${pct(comp, 1)}</span>
+        <span class="k-foot">${deltaHtml(comp, COMP_SERIES[n - 2])} 较上周</span>
+        ${spark(COMP_SERIES, "var(--s1)")}
+      </a>
+      <a class="panel kpi ${SHORT ? "alert" : ""}" href="#supply">
+        <span class="k-label">缺货格子${info("可读周数 &lt; 2 的「主题 × 档位」格子数，共 24 格。<br>代表内容够不够")}</span>
+        <span class="k-val">${SHORT}<small>/ 24 格</small></span>
+        <span class="k-foot">${shortDelta(SHORT - shortSeries[n - 2])} 较上周</span>
+        ${spark(shortSeries, "var(--critical)")}
+      </a>
+    </div>
+    <div class="grid g-3 row">
+      <div class="panel span-2"><h3>WMR 周趋势 <small>近 12 周</small></h3>${lineChart(WMR, WEEKS, "var(--s1)")}</div>
+      <div class="panel"><h3>本周 WMR · 按主题</h3>
+        <div class="bars">${byCat.map(r => `<div class="bar-row" data-tip="${r.c} · ${fmt(r.v)} 次 · 占 ${pct(READ_SHARE[r.c])}"><span class="lbl">${r.c}</span><div class="track"><div class="fill" style="width:${r.v / mx * 100}%;background:${CAT_C[r.c]}"></div></div><span class="val">${fmt(r.v)}</span></div>`).join("")}</div>
+      </div>
+    </div>`;
+}
+
+/* ---------- page: 供给 ---------- */
+function renderSupply() {
+  if (!S.cell) S.cell = [...CELLS].sort((a, b) => a.weeks - b.weeks)[0].key;
+  const sel = CELLS.find(c => c.key === S.cell);
+  const needList = CELLS.filter(c => c.need > 0).sort((a, b) => b.need - a.need || a.weeks - b.weeks);
+  const needTotal = needList.reduce((s, c) => s + c.need, 0);
+  const newTotal = CELLS.reduce((s, c) => s + c.nw, 0);
+  const cell = c => `<button type="button" class="st-${c.st}" data-cell="${c.key}" aria-pressed="${c.key === S.cell}" aria-label="${c.key} 在架 ${c.inv} 篇，可读 ${c.weeks.toFixed(1)} 周"><b>${c.inv}</b><small>${c.weeks.toFixed(1)} 周</small></button>`;
+  const colTot = LEVELS.map(lv => CELLS.filter(c => c.lv === lv).reduce((s, c) => s + c.inv, 0));
+
+  $("#p-supply").innerHTML = `
+    <div class="grid g-4">
+      <div class="panel kpi"><span class="k-label">在架篇数${info("已发布、未下架、新闻类在时效内。<br>按档位版本计（原文 134 篇）")}</span><span class="k-val">${INV_TOTAL}<small>篇</small></span></div>
+      <div class="panel kpi alert"><span class="k-label">缺货格子${info("可读周数 &lt; 2 周")}</span><span class="k-val">${SHORT}<small>/ 24 格</small></span></div>
+      <div class="panel kpi"><span class="k-label">需补篇数${info("让每格都达到 4 周可读所需的篇数合计")}</span><span class="k-val">${needTotal}<small>篇</small></span></div>
+      <div class="panel kpi"><span class="k-label">本周新增</span><span class="k-val">${newTotal}<small>篇</small></span></div>
+    </div>
+    <div class="grid g-52 row">
+      <div class="panel">
+        <h3><span>库存矩阵 · 主题 × 档位</span><small>格内：在架篇数 / 可读周数${info("可读周数 = 在架篇数 ÷ 本格读者每周平均阅读篇数。<br>即一个新读者在这一格能读几周不重复")}</small></h3>
+        <div class="matrix" role="group" aria-label="库存矩阵">
+          <span></span>${LEVELS.map(l => `<span class="hh">${l}</span>`).join("")}<span class="hh r">合计</span>
+          ${CATS.map(cat => `<span class="rh"><i style="background:${CAT_C[cat]}"></i>${cat}</span>${CELLS.filter(c => c.cat === cat).map(cell).join("")}<span class="tot">${CELLS.filter(c => c.cat === cat).reduce((s, c) => s + c.inv, 0)}</span>`).join("")}
+          <span class="ft"></span>${colTot.map(v => `<span class="ft">${v}</span>`).join("")}<span class="tot"><b>${INV_TOTAL}</b></span>
+        </div>
+        <div class="legend"><span><i class="st-crit"></i>&lt; 2 周 · 缺货</span><span><i class="st-warn"></i>2–4 周 · 偏紧</span><span><i class="st-good"></i>≥ 4 周 · 充足</span></div>
+        <div class="cellinfo"><b>${sel.cat} · ${sel.lv}</b><span>在架 <b>${sel.inv}</b> 篇</span><span>读者 <b>${fmt(sel.readers)}</b> 人</span><span>每周人均读 <b>${sel.wpr}</b> 篇</span><span>可读 <b>${sel.weeks.toFixed(1)}</b> 周</span><span>需补 <b>${sel.need}</b> 篇</span></div>
+      </div>
+      <div class="panel">
+        <h3><span>补写清单</span><small>按需补篇数排序</small></h3>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>格子</th><th class="r">在架</th><th class="r">可读</th><th class="r">需补${info("4 周 × 每周人均阅读篇数 − 在架篇数")}</th><th class="r">本周新增</th><th>优先标签</th></tr></thead>
+          <tbody>${needList.map(c => `<tr class="click ${c.key === S.cell ? "sel" : ""}" data-cell="${c.key}" tabindex="0"><td>${catDot(c.cat)} · ${c.lv}</td><td class="r">${c.inv}</td><td class="r">${stPill(c)}</td><td class="r need">${c.need}</td><td class="r">${c.nw}</td><td class="tags">${TOP_TAGS[c.cat].join("、")}</td></tr>`).join("")}</tbody>
+          <tfoot><tr><td>合计</td><td></td><td></td><td class="r">${needTotal}</td><td class="r">${needList.reduce((s, c) => s + c.nw, 0)}</td><td></td></tr></tfoot>
+        </table></div>
+      </div>
+    </div>`;
+}
+
+/* ---------- page: 内容表现 ---------- */
+function renderContent() {
+  const rows = agg(S.dim);
+  const key = S.sort, dir = S.dir;
+  const ok = rows.filter(r => !r.low).sort((a, b) => (a[key] - b[key]) * dir), low = rows.filter(r => r.low);
+  const th = (k, label, tip) => `<th class="sortable r" data-sort="${k}" tabindex="0" ${S.sort === k ? `aria-sort="${S.dir < 0 ? "descending" : "ascending"}"` : ""}>${label}${tip ? info(tip) : ""}</th>`;
+  const lbl = r => S.dim === "主题" ? catDot(r.key) : r.key;
+  const tr = r => `<tr class="click ${r.low ? "low" : ""} ${S.pick === r.key ? "sel" : ""}" data-pick="${r.key}" tabindex="0"><td>${lbl(r)}</td><td class="r">${r.n}</td><td class="r">${fmt(r.reads)}</td>${r.low ? `<td class="r" colspan="3">数据不足</td>` : `<td class="r">${pct(r.ctr, 1)}${ppHtml(r.ctr, AVG.ctr)}</td><td class="r">${pct(r.comp, 1)}${ppHtml(r.comp, AVG.comp)}</td><td class="r">${pct(r.save, 1)}${ppHtml(r.save, AVG.save)}</td>`}</tr>`;
+
+  // supply vs demand by theme
+  const sd = CATS.map(c => {
+    const inv = CELLS.filter(x => x.cat === c).reduce((s, x) => s + x.inv, 0) / INV_TOTAL;
+    return { c, read: READ_SHARE[c], inv, d: READ_SHARE[c] - inv };
+  }).sort((a, b) => b.d - a.d);
+  const sdMax = Math.max(...sd.map(r => Math.max(r.read, r.inv)));
+
+  // article list
+  let arts = ARTS.filter(a => !a.low);
+  if (S.pick) arts = arts.filter(a => S.dim === "档位" ? a.levels.includes(S.pick) : DIMS[S.dim](a) === S.pick);
+  arts.sort((a, b) => (b.comp - a.comp) * (S.best ? 1 : -1));
+  arts = arts.slice(0, 10);
+  const lowN = ARTS.filter(a => a.low).length;
+
+  $("#p-content").innerHTML = `
+    <div class="panel">
+      <h3><span>按类型 · 近 4 周</span>
+        <span class="seg" role="group" aria-label="维度">${Object.keys(DIMS).map(d => `<button type="button" data-dim="${d}" aria-pressed="${S.dim === d}">${d}</button>`).join("")}</span>
+      </h3>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>${S.dim}</th>${th("n", "篇数")}${th("reads", "有意义阅读")}${th("ctr", "点开率", "点开 ÷ 曝光：想不想读。<br>右侧小字 = 与全站平均相差的百分点")}${th("comp", "有意义完读率", "有意义阅读 ÷ 点开：读不读得下去")}${th("save", "收藏率", "收藏 ÷ 有意义阅读：有没有打动人")}</tr></thead>
+        <tbody>
+          <tr class="avg"><td>全站平均</td><td class="r">${ARTS.length}</td><td class="r">${fmt(AVG.reads)}</td><td class="r">${pct(AVG.ctr, 1)}<span class="pp"></span></td><td class="r">${pct(AVG.comp, 1)}<span class="pp"></span></td><td class="r">${pct(AVG.save, 1)}<span class="pp"></span></td></tr>
+          ${ok.map(tr).join("")}${low.map(tr).join("")}
+        </tbody>
+      </table></div>
+    </div>
+    <div class="grid g-52 row">
+      <div class="panel">
+        <h3><span>文章榜${S.pick ? ` · ${S.pick} <button type="button" class="clear" data-pick-clear>清除 ×</button>` : ""}</span>
+          <span class="seg" role="group" aria-label="排序"><button type="button" data-best="1" aria-pressed="${S.best}">完读最高</button><button type="button" data-best="0" aria-pressed="${!S.best}">完读最低</button></span>
+        </h3>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>文章</th><th>主题</th><th class="r">点开率</th><th class="r">有意义完读率</th><th class="r">收藏率</th></tr></thead>
+          <tbody>${arts.map(a => `<tr><td class="title">${a.zh}<small>${a.en} · ${a.genre} · ${a.words} 词</small></td><td>${catDot(a.cat)}</td><td class="r">${pct(a.ctr, 1)}</td><td class="r">${pct(a.comp, 1)}${ppHtml(a.comp, AVG.comp)}</td><td class="r">${pct(a.save, 1)}</td></tr>`).join("")}</tbody>
+        </table></div>
+        ${lowN ? `<div class="foot">另有 ${lowN} 篇曝光不足 ${MIN_EXP}，暂不排名</div>` : ""}
+      </div>
+      <div class="panel">
+        <h3><span>读者在读 vs 库存 · 按主题</span></h3>
+        <div class="sd">${sd.map(r => `<div class="sd-row" data-tip="${r.c} · 有意义阅读占 ${pct(r.read)} · 库存占 ${pct(r.inv)}"><span>${catDot(r.c)}</span><div class="sd-bars"><div class="track"><div class="fill" style="width:${r.read / sdMax * 100}%;background:${CAT_C[r.c]}"></div></div><div class="track"><div class="fill inv" style="width:${r.inv / sdMax * 100}%"></div></div></div><span class="sd-diff">${Math.abs(r.d) < .03 ? `<span class="pill">持平</span>` : r.d > 0 ? `<span class="pill good">多写 +${(r.d * 100).toFixed(0)}</span>` : `<span class="pill">少写 ${(r.d * 100).toFixed(0)}</span>`}</span></div>`).join("")}</div>
+        <div class="legend"><span><i style="background:var(--s1)"></i>有意义阅读占比</span><span><i style="background:var(--muted-bar)"></i>库存占比</span></div>
+      </div>
+    </div>`;
+}
+
+/* ---------- routing & events ---------- */
+const RENDER = { overview: renderOverview, supply: renderSupply, content: renderContent };
+function renderNav() {
+  $("#nav").innerHTML = PAGES.map(p => `<a href="#${p.id}" ${p.id === S.page ? 'aria-current="page"' : ""}>${p.name}<small>${p.sub}</small></a>`).join("");
+}
+function show(page) {
+  if (!RENDER[page]) page = "overview";
+  S.page = page;
+  PAGES.forEach(p => $("#p-" + p.id).hidden = p.id !== page);
+  $("#pageTitle").textContent = PAGES.find(p => p.id === page).name;
+  renderNav(); RENDER[page]();
+  try { localStorage.setItem("ylz-content-page", page); } catch (e) {}
+}
+const rerender = () => RENDER[S.page]();
+
+window.addEventListener("hashchange", () => { show(location.hash.slice(1)); window.scrollTo(0, 0); });
+document.addEventListener("click", e => {
+  const t = e.target;
+  const inf = t.closest(".info");
+  if (inf) { e.preventDefault(); e.stopPropagation(); const r = inf.getBoundingClientRect(); showTip(inf, r.left, r.bottom); return; }
+  const cell = t.closest("[data-cell]");
+  if (cell) { S.cell = cell.dataset.cell; rerender(); return; }
+  const dim = t.closest("[data-dim]");
+  if (dim) { S.dim = dim.dataset.dim; S.pick = null; rerender(); return; }
+  const best = t.closest("[data-best]");
+  if (best) { S.best = best.dataset.best === "1"; rerender(); return; }
+  if (t.closest("[data-pick-clear]")) { S.pick = null; rerender(); return; }
+  const sort = t.closest("th[data-sort]");
+  if (sort) { if (S.sort === sort.dataset.sort) S.dir *= -1; else { S.sort = sort.dataset.sort; S.dir = -1; } rerender(); return; }
+  const pick = t.closest("[data-pick]");
+  if (pick) { S.pick = S.pick === pick.dataset.pick ? null : pick.dataset.pick; rerender(); }
+});
+document.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches("[data-cell], [data-pick], th[data-sort]")) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
+});
+
+const tip = $("#tip");
+function showTip(el, cx, cy) {
+  tip.innerHTML = el.dataset.tip; tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let x = cx + 14, y = cy + 14;
+  if (x + r.width > innerWidth - 8) x = Math.max(8, cx - r.width - 14);
+  if (y + r.height > innerHeight - 8) y = cy - r.height - 14;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+document.addEventListener("mousemove", e => {
+  const t = e.target.closest("[data-tip]");
+  if (!t) { tip.hidden = true; return; }
+  showTip(t, e.clientX, e.clientY);
+});
+document.addEventListener("focusin", e => { if (e.target.matches(".info")) { const r = e.target.getBoundingClientRect(); showTip(e.target, r.left, r.bottom); } });
+document.addEventListener("focusout", () => tip.hidden = true);
+document.addEventListener("scroll", () => tip.hidden = true, true);
+
+let start = location.hash.slice(1);
+if (!RENDER[start]) { try { start = localStorage.getItem("ylz-content-page") || "overview"; } catch (e) { start = "overview"; } }
+show(start);
+})();
+</script>
